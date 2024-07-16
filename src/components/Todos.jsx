@@ -1,11 +1,22 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { removeTodo } from "../features/todo/todoSlice";
+import { removeTodo, updateTodo } from "../features/todo/todoSlice";
 
 function Todos() {
   const todos = useSelector((state) => state.todos);
-  const [isEditable, setIsEditable] = useState(false)
+  const [isEditable, setIsEditable] = useState(null);
+  const [todoMsg, setTodoMsg] = useState("");
   const dispatch = useDispatch();
+
+  const handleEditClick = (todo) => {
+    setIsEditable(todo.id);
+    setTodoMsg(todo.text);
+  };
+
+  const handleSaveClick = (todo) => {
+    dispatch(updateTodo({ id: todo.id, text: todoMsg }));
+    setIsEditable(null);
+  };
 
   return (
     <>
@@ -15,15 +26,31 @@ function Todos() {
             className="mt-4 flex justify-between items-center bg-zinc-800 px-4 py-2 rounded"
             key={todo.id}
           >
-            <div className="text-white">{todo.text}</div>
+            {isEditable === todo.id ? (
+              <input
+                type="text"
+                value={todoMsg}
+                onChange={(e) => setTodoMsg(e.target.value)}
+                className="text-white bg-zinc-800"
+              />
+            ) : (
+              <div className="text-white">{todo.text}</div>
+            )}
             <div className="flex flex-row gap-[5px] items-center">
-              <button 
-              onClick={setIsEditable(true)}
-              className="text-white bg-red-500 border-0 py-1 px-4 focus:outline-none hover:bg-red-600 rounded text-md">
-              {isEditable ? "✎" : "✅"}
+              <button
+                onClick={() =>
+                  isEditable === todo.id
+                    ? handleSaveClick(todo)
+                    : handleEditClick(todo)
+                }
+                className="text-white bg-red-500 border-0 py-1 px-4 focus:outline-none hover:bg-red-600 rounded text-md"
+              >
+                {isEditable === todo.id ? "✅" : "✎"}
               </button>
               <button
-                onClick={() => dispatch(removeTodo(todo.id))}
+                onClick={(e) => {
+                  dispatch(removeTodo(todo.id));
+                }}
                 className="text-white bg-red-500 border-0 py-1 px-4 focus:outline-none hover:bg-red-600 rounded text-md"
               >
                 <svg
